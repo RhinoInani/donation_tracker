@@ -24,7 +24,6 @@ dependencies:
   flutter:
     sdk: flutter
   google_fonts:
-  table_calendar:
   flutter_speed_dial: ^2.1.1
 
 

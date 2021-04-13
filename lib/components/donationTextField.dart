@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
 class DonationsTextField extends StatelessWidget {
-  DonationsTextField({
-    Key key,
-    @required this.textController,
-    @required this.text,
-    @required this.keyboardType,
-  }) : super(key: key);
+  DonationsTextField(
+      {Key key,
+      @required this.textController,
+      @required this.text,
+      @required this.isAmount})
+      : super(key: key);
 
   final TextEditingController textController;
-  final keyboardType;
   final String text;
+  final bool isAmount;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +36,9 @@ class DonationsTextField extends StatelessWidget {
               borderSide: BorderSide(color: Colors.grey[400]),
             ),
           ),
-          keyboardType: keyboardType,
+          keyboardType: isAmount
+              ? TextInputType.numberWithOptions(decimal: true, signed: false)
+              : null,
           controller: textController,
           textAlign: TextAlign.center,
           expands: false,

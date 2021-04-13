@@ -1,4 +1,5 @@
 import 'package:donation_tracker/components/donationTextField.dart';
+import 'package:donation_tracker/screens/settingsScreen.dart';
 import 'package:donation_tracker/userSettings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -22,12 +23,14 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     targetAmount = 0.0;
     amountDonated = 0.0;
+    selectedDate ??= DateTime.now();
     remainder = targetAmount - amountDonated;
   }
 
   void _newDonationPopUp(context, Size size, bool isMoney) {
     TextEditingController recipientController = TextEditingController();
     TextEditingController amountController = TextEditingController();
+    TextEditingController valueController = TextEditingController();
     String date = "${currentDate.month}/${currentDate.day}/${currentDate.year}";
     counter = 0;
 
@@ -37,106 +40,138 @@ class _HomeScreenState extends State<HomeScreen> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30)),
-              ),
               height: MediaQuery.of(context).size.height * 0.85,
               padding: EdgeInsets.only(
                   right: MediaQuery.of(context).size.width * 0.025,
                   left: MediaQuery.of(context).size.width * 0.025,
                   top: MediaQuery.of(context).size.height * 0.02,
                   bottom: MediaQuery.of(context).size.height * 0.03),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    children: [
-                      Text(
-                        "New Donation",
-                        style: TextStyle(fontSize: size.width * 0.06),
+              child: Scaffold(
+                resizeToAvoidBottomInset: false,
+                body: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Row(
+                        children: [
+                          Text(
+                            "New Donation",
+                            style: TextStyle(fontSize: size.width * 0.06),
+                          ),
+                          Spacer(),
+                          IconButton(
+                            icon: Icon(Icons.close),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              recipientController.clear();
+                              amountController.clear();
+                            },
+                          ),
+                        ],
                       ),
-                      Spacer(),
-                      IconButton(
-                        icon: Icon(Icons.close),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          recipientController.clear();
-                          amountController.clear();
-                        },
+                      Divider(
+                        height: 10,
+                        indent: 10,
+                        endIndent: 10,
+                        color: Colors.black87,
+                        thickness: 0.5,
                       ),
-                    ],
-                  ),
-                  Divider(
-                    height: 10,
-                    indent: 10,
-                    endIndent: 10,
-                    color: Colors.black87,
-                    thickness: 0.5,
-                  ),
-                  SizedBox(
-                    height: size.height * 0.05,
-                  ),
-                  DonationsTextField(
-                      textController: recipientController,
-                      text: "Recipient",
-                      keyboardType: null),
-                  DonationsTextField(
-                    textController: amountController,
-                    text: "Amount:",
-                    keyboardType: TextInputType.numberWithOptions(
-                        decimal: true, signed: false),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Padding(
-                        padding:
-                            EdgeInsets.only(top: 8.0, bottom: 8.0, right: 8.0),
-                        child: Text(
-                          "Date:",
-                          style: TextStyle(fontSize: size.width * 0.045),
-                        ),
+                      SizedBox(
+                        height: size.height * 0.05,
                       ),
-                      GestureDetector(
-                        onTap: () async {
-                          await _selectDate(context, isMoney);
-                          counter++;
-                          setState(() {
-                            date =
-                                "${selectedDate.month}/${selectedDate.day}/${selectedDate.year}";
-                          });
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.grey[400],
-                              width: 0.7,
+                      DonationsTextField(
+                        textController: recipientController,
+                        text: "Recipient",
+                        isAmount: false,
+                      ),
+                      isMoney
+                          ? Container()
+                          : DonationsTextField(
+                              textController: valueController,
+                              text: "Item",
+                              isAmount: false),
+                      DonationsTextField(
+                        textController: amountController,
+                        text: isMoney ? "Amount:" : "Value",
+                        isAmount: true,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(
+                                top: 8.0, bottom: 8.0, right: 8.0),
+                            child: Text(
+                              "Date:",
+                              style: TextStyle(fontSize: size.width * 0.045),
                             ),
                           ),
-                          width: size.width * 0.6,
-                          height: size.height * 0.07,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                "$date",
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.poppins(
-                                  color: Colors.black,
+                          GestureDetector(
+                            onTap: () async {
+                              await _selectDate(context, isMoney);
+                              counter++;
+                              setState(() {
+                                date =
+                                    "${selectedDate.month}/${selectedDate.day}/${selectedDate.year}";
+                              });
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: Colors.grey[400],
+                                  width: 0.7,
                                 ),
                               ),
-                            ],
+                              width: size.width * 0.6,
+                              height: size.height * 0.07,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "$date",
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: size.height * 0.05,
+                      ),
+                      Center(
+                        child: GestureDetector(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: Colors.grey[400],
+                                width: 0.7,
+                              ),
+                            ),
+                            width: size.width * 0.85,
+                            height: size.height * 0.07,
+                            child: Center(
+                              child: Text(
+                                "Confirm",
+                                style: TextStyle(fontSize: size.width * 0.045),
+                              ),
+                            ),
+                          ),
+                          onTap: () {},
                         ),
-                      )
+                      ),
                     ],
                   ),
-                ],
+                ),
               ),
             );
           },
@@ -190,13 +225,23 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white.withOpacity(0),
-          elevation: 0,
-        ),
+        resizeToAvoidBottomInset: false,
+        // appBar: AppBar(
+        //   backgroundColor: Colors.white.withOpacity(0),
+        //   elevation: 0,
+        //   actions: [
+        //     IconButton(
+        //         icon: Icon(
+        //           Icons.settings,
+        //           color: Colors.grey[600],
+        //         ),
+        //         onPressed: () {})
+        //   ],
+        // ),
         body: Padding(
           padding: EdgeInsets.only(
             bottom: size.height * 0.05,
+            top: size.height * 0.05,
           ),
           child: SingleChildScrollView(
             child: Column(
@@ -246,10 +291,10 @@ class _HomeScreenState extends State<HomeScreen> {
         floatingActionButton: SpeedDial(
           useRotationAnimation: true,
           closeManually: false,
-          curve: Curves.elasticOut,
+          curve: Curves.decelerate,
           overlayColor: Colors.transparent,
-          overlayOpacity: 0.5,
-          buttonSize: 60.0,
+          overlayOpacity: 0.3,
+          buttonSize: 70.0,
           visible: true,
           icon: Icons.add,
           activeIcon: Icons.remove,
@@ -281,6 +326,17 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               onLongPress: () {},
             ),
+            SpeedDialChild(
+                child: Icon(Icons.settings),
+                backgroundColor: Colors.deepPurple[300],
+                label: 'Settings',
+                labelStyle: TextStyle(fontSize: 18.0),
+                onTap: () {
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (context) {
+                    return SettingsScreen();
+                  }));
+                })
           ],
         ));
   }
